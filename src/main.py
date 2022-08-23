@@ -3,8 +3,3 @@ from routers.crud import router as tasks_router
 
 app = FastAPI()
 app.router.include_router(tasks_router)
-
-
-@app.get("/")
-def hello():
-    return {"message": "Hello, world!"}

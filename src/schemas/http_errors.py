@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 
 
-class TaskNotFondError(BaseModel):
+class TaskNotFondErrorSchema(BaseModel):
     detail: str = "Задача не найдена"
