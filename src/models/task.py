@@ -1,12 +1,10 @@
-from pydantic import BaseModel, Field
+from db_settings import Base
+import sqlalchemy as sa
 
 
-class Task(BaseModel):
-    id: int = Field(title="Идентификатор задачи", ge=0)
-    title: str = Field(title="Описание задачи")
-    done: bool = Field(False, title="Флаг выполнения задачи")
+class Task(Base):
+    __tablename__ = "tasks"
 
-
-class CreateTask(BaseModel):
-    title: str = Field(title="Описание задачи")
-    done: bool = Field(False, title="Флаг выполнения задачи")
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True, comment="Идентификатор задачи")
+    title = sa.Column(sa.String, nullable=False, comment="Описание задачи")
+    done = sa.Column(sa.Boolean, nullable=False, comment="Флаг выполнения задачи")
