@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  postgres:
+    container_name: postgres-todolist
+    image: postgres
+    environment:
+      POSTGRES_DB: "todolist"
+      POSTGRES_USER: "todolist"
+      POSTGRES_PASSWORD: "superpass"
+      PGDATA: /data/postgres
+    volumes:
+       - postgres:/data/postgres
+    ports:
+      - "5432:5432"
+volumes:
+    postgres:
