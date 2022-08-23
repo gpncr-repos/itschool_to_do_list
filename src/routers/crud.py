@@ -1,70 +1,42 @@
 from fastapi import APIRouter, HTTPException
-from models.task import Task, CreateTask
-from models.http_errors import TaskNotFondError
+from schemas.task import TaskSchema, CreateTaskSchema
+from schemas.http_errors import TaskNotFondErrorSchema
 from typing import List
+from queries import tasks
+from fastapi import Depends
+from dependencies.db import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
-fake_tasks = [
-    Task(**{
-        "id": 1,
-        "title": "first_task",
-        "done": True
-    }),
-    Task(**{
-        "id": 2,
-        "title": "second_task",
-        "description": "other task",
-        "done": False
-    })
-]
+
+@router.post("", response_model=TaskSchema)
+async def create_task(task: CreateTaskSchema, db: AsyncSession = Depends(get_db)):
+    task = await tasks.create_task(create_schema=task, db=db)
+    return TaskSchema.from_orm(task)
 
 
-@router.post("", response_model=Task)
-def create_task(task: CreateTask):
-    sorted_tasks = sorted(fake_tasks, key=lambda task: task.id, reverse=True)
-    if sorted_tasks:
-        last_task_id = sorted_tasks[0].id
-        last_task_id += 1
-    else:
-        last_task_id = 1
-
-    to_add = Task(id=last_task_id, title=task.title)
-    fake_tasks.append(to_add)
-
-    return to_add
+@router.get("", response_model=List[TaskSchema])
+async def get_tasks(db: AsyncSession = Depends(get_db)):
+    return await tasks.get_all_tasks(db)
 
 
-@router.get("", response_model=List[Task])
-def get_tasks():
-    return fake_tasks
-
-
-@router.put("/{task_id}", responses={404: {"model": TaskNotFondError}})
-def update_task(task_id: int, task_body: CreateTask):
-    task = None
-    for i in range(len(fake_tasks)):
-        if fake_tasks[i].id == task_id:
-            task = fake_tasks[i]
-
-    if not task:
+@router.put("/{task_id}", responses={404: {"model": TaskNotFondErrorSchema}})
+async def update_task(task_id: int, task_body: CreateTaskSchema, db: AsyncSession = Depends(get_db)):
+    to_update = await tasks.get_task(db, task_id)
+    if to_update is None:
         raise HTTPException(status_code=404, detail="task not found")
 
-    title = task_body.title
-    task.title = title
+    to_update.title = task_body.title
+    to_update.done = task_body.done
 
-    return task
+    return await tasks.update_task(to_update=to_update, db=db)
 
 
-@router.delete("/{task_id}", responses={404: {"model": TaskNotFondError}})
-def delete_task(task_id: int):
-    idx = None
-    for i in range(len(fake_tasks)):
-        if fake_tasks[i].id == task_id:
-            idx = i
-            break
-
-    if idx is None:
+@router.delete("/{task_id}", responses={404: {"model": TaskNotFondErrorSchema}})
+async def delete_task(task_id: int, db: AsyncSession = Depends(get_db)):
+    to_delete = await tasks.get_task(db, task_id)
+    if to_delete is None:
         raise HTTPException(status_code=404, detail="task not found")
 
-    fake_tasks.pop(idx)
+    await tasks.delete_task(to_delete=to_delete, db=db)
