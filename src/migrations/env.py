@@ -8,14 +8,18 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from db_settings import Base
 
 from alembic import context
+from db_settings import DB_NAME, DB_HOST, DB_PASS, DB_USER
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 section = config.config_ini_section
-config.set_section_option(section, "DB_USER", "todolist")
-config.set_section_option(section, "DB_PASS", "superpass")
-config.set_section_option(section, "DB_NAME", "todolist")
+
+
+config.set_section_option(section, "DB_USER", DB_USER)
+config.set_section_option(section, "DB_HOST", DB_HOST)
+config.set_section_option(section, "DB_PASS", DB_PASS)
+config.set_section_option(section, "DB_NAME", DB_NAME)
 
 
 # Interpret the config file for Python logging.

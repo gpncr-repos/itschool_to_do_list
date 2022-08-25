@@ -1,9 +1,14 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
+import os
 
+DB_USER = os.environ.get("DB_USER", "todolist")
+DB_PASS = os.environ.get("DB_PASS", "superpass")
+DB_HOST = os.environ.get("DB_HOST", "localhost")
+DB_NAME = os.environ.get("DB_NAME", "todolist")
 
-SQLALCHEMY_DATABASE_URL = "postgresql+asyncpg://todolist:superpass@localhost/todolist"
+SQLALCHEMY_DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}"
 
 engine = create_async_engine(
     SQLALCHEMY_DATABASE_URL
